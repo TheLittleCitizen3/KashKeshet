@@ -1,8 +1,12 @@
 ﻿using Common;
+using KashServer.Clients;
+using KashServer.SendRecive;
+using KashServer.Strings;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -14,13 +18,13 @@ namespace KashServer
     public class Server : IServer
     {
         private readonly ILogger<Worker> _logger;
-        private ConcurrentDictionary<ClientInfo, TcpClient> Clients { get; set; }
+        private ConcurrentDictionary<ClientInfo, Client> Clients { get; set; }
         readonly object _lock = new object();
         IPAddress Ip;
         int Port;
         public Server(IPAddress ip, int port, ILogger<Worker> logger)
         {
-            Clients = new ConcurrentDictionary<ClientInfo, TcpClient>();
+            Clients = new ConcurrentDictionary<ClientInfo, Client>();
             Ip = ip;
             Port = port;
             _logger = logger;
@@ -31,11 +35,12 @@ namespace KashServer
             ServerSocket.Start();
             while (true)
             {
-                TcpClient client = ServerSocket.AcceptTcpClient();
-                ClientInfo clientInfo = new ClientInfo("");
+                TcpClient tcpClient = ServerSocket.AcceptTcpClient();
+                Client client = new Client(tcpClient);
+                ClientInfo clientInfo = client.ClientInfo;
                 Clients.TryAdd(clientInfo, client);
                 _logger.LogInformation("New Client Was Added!");
-
+                SendMessage.Send($"The user: {clientInfo.DisplayName} joinned", Clients.Values.ToList());
                 Thread t = new Thread(HandleClient);
                 t.Start(clientInfo);
 
@@ -44,13 +49,13 @@ namespace KashServer
         private void HandleClient(object obj)
         {
             ClientInfo clientInfo = (ClientInfo)obj;
-            TcpClient client;
+            Client client;
             client = Clients[clientInfo];
             while (true)
             {
                 try
                 {
-                    NetworkStream stream = client.GetStream();
+                    NetworkStream stream = client.TcpClient.GetStream();
                     byte[] buffer = new byte[1024];
                     int byte_count = stream.Read(buffer, 0, buffer.Length);
 
@@ -60,7 +65,8 @@ namespace KashServer
                     }
 
                     string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
-                    Brodcast(data);
+                    data = MessageFormatter.FormatMessage(data, client);
+                    SendMessage.Send(data, Clients.Values.ToList());
                     _logger.LogInformation($"Client id:{clientInfo.UID} Write:{data}");
                 }
                 catch (Exception ex)
@@ -71,24 +77,10 @@ namespace KashServer
                 
             }
 
-            TcpClient tcpClient;
-            Clients.TryRemove(clientInfo, out tcpClient);
-            client.Client.Shutdown(SocketShutdown.Both);
-            client.Close();
-        }
-        private void Brodcast(string data)
-        {
-            byte[] buffer = Encoding.ASCII.GetBytes(data + Environment.NewLine);
-
-            lock (_lock)
-            {
-                foreach (TcpClient c in Clients.Values)
-                {
-                    NetworkStream stream = c.GetStream();
-
-                    stream.Write(buffer, 0, buffer.Length);
-                }
-            }
+            Clients.TryRemove(clientInfo, out _);
+            SendMessage.Send($"The user: {clientInfo.DisplayName} disconnected", Clients.Values.ToList());
+            client.TcpClient.Client.Shutdown(SocketShutdown.Both);
+            client.TcpClient.Close();
         }
     }
 }
