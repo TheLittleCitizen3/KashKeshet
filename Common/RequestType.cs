@@ -4,10 +4,12 @@ using System.Text;
 
 namespace Common
 {
+    [Serializable]
     public enum RequestType
     {
         Register,
         GetConnectedUsers,
-        StartPrivteChat
+        StartPrivteChat,
+        SendGlobalMessage
     }
 }

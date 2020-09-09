@@ -7,7 +7,7 @@ using System.Text;
 
 namespace KashServer.requestHandler
 {
-    public class Requestcontext
+    public class RequestContext
     {
         private IRequestAction _requestAction;
         public void SetRequestAction(IRequestAction requestAction)

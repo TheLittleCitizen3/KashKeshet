@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Common
 {
+    [Serializable]
     public class ClientInfo
     {
         public readonly Guid UID;

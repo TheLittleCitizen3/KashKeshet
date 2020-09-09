@@ -14,5 +14,10 @@ namespace KashServer.Strings
             data = $"[{dateTime}] " + $"{displayName} > " + data;
             return data;
         }
+
+        internal static string FormatMessage(string data)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

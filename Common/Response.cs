@@ -5,10 +5,9 @@ using System.Text;
 namespace Common
 {
     [Serializable]
-    public class Request
+    public class Response
     {
-        public ClientInfo ClientsInfo;
-        public RequestType Type;
+        public ResponseType ResponseType;
         public Object Content;
     }
 }

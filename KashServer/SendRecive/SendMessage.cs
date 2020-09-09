@@ -9,17 +9,15 @@ namespace KashServer.SendRecive
     public static class SendMessage
     {
         readonly static object _lock = new object();
-        public static void Send(string data, List<Client> clients)
+        public static void Send(byte[] serizlizedData, List<Client> clients)
         {
-            byte[] buffer = Encoding.ASCII.GetBytes(data);
-
             lock (_lock)
             {
                 foreach (Client c in clients)
                 {
                     NetworkStream stream = c.TcpClient.GetStream();
 
-                    stream.Write(buffer, 0, buffer.Length);
+                    stream.Write(serizlizedData, 0, serizlizedData.Length);
                 }
             }
         }

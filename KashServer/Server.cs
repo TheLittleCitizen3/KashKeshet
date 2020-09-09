@@ -1,5 +1,6 @@
 ﻿using Common;
 using KashServer.Clients;
+using KashServer.requestHandler;
 using KashServer.SendRecive;
 using KashServer.Strings;
 using Microsoft.Extensions.Logging;
@@ -40,7 +41,7 @@ namespace KashServer
                 ClientInfo clientInfo = client.ClientInfo;
                 Clients.TryAdd(clientInfo, client);
                 _logger.LogInformation("New Client Was Added!");
-                SendMessage.Send($"The user: {clientInfo.DisplayName} joinned", Clients.Values.ToList());
+                //SendMessage.Send($"The user: {clientInfo.DisplayName} joinned", Clients.Values.ToList());
                 Thread t = new Thread(HandleClient);
                 t.Start(clientInfo);
 
@@ -64,10 +65,13 @@ namespace KashServer
                         break;
                     }
 
-                    string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
-                    data = MessageFormatter.FormatMessage(data, client);
-                    SendMessage.Send(data, Clients.Values.ToList());
-                    _logger.LogInformation($"Client id:{clientInfo.UID} Write:{data}");
+                    Request request = Serializator.Deserialize<Request>(buffer);
+                    //string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
+                    //data = MessageFormatter.FormatMessage(data, client);
+                    RequsetManager requestManager = new RequsetManager();
+                    requestManager.HandleRequest(request, Clients);
+                    //SendMessage.Send(data, Clients.Values.ToList());
+                    _logger.LogInformation($"Client id:{clientInfo.UID} Write:{request.Content.ToString()}");
                 }
                 catch (Exception ex)
                 {
@@ -78,7 +82,8 @@ namespace KashServer
             }
 
             Clients.TryRemove(clientInfo, out _);
-            SendMessage.Send($"The user: {clientInfo.DisplayName} disconnected", Clients.Values.ToList());
+           
+            //SendMessage.Send($"The user: {clientInfo.DisplayName} disconnected", Clients.Values.ToList());
             client.TcpClient.Client.Shutdown(SocketShutdown.Both);
             client.TcpClient.Close();
         }
