@@ -11,9 +11,11 @@ namespace KashServer.responseHandler
     {
         public Response CreateResponse(ResponseType responseType, object content)
         {
-            Response response = new Response();
-            response.ResponseType = responseType;
-            response.Content = content;
+            Response response = new Response
+            {
+                ResponseType = responseType,
+                Content = content
+            };
             return response;
         }
         

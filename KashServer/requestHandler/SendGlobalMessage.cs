@@ -16,10 +16,10 @@ namespace KashServer.requestHandler
         public void Invoke(Request request, ConcurrentDictionary<ClientInfo, Client> clients)
         {
             String data = (string)request.Content;
-            data = MessageFormatter.FormatMessage(data);
+            data = MessageFormatter.FormatMessage(data,request.ClientsInfo);
             IResponseAction responseAction = new ResponseHandler();
             Response response = responseAction.CreateResponse(ResponseType.Text, data);
-            byte[] serializedData = Serializator.Serialize<Response>(response);
+            byte[] serializedData = Serializator.Serialize(response);
             SendMessage.Send(serializedData,clients.Values.ToList());
         }
     }

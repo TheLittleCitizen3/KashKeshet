@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml;
 
@@ -9,33 +11,27 @@ namespace Common
 {
     public static class Serializator
     {
-        public static  byte[] Serialize<T>(T response)
+        public static  byte[] Serialize(Object obj)
         {
-            byte[] bytes;
+            BinaryFormatter bf = new BinaryFormatter();
             using (var stream = new MemoryStream())
             {
-                var serivalizer = new DataContractSerializer(typeof(T));
-                serivalizer.WriteObject(stream, response);
-                bytes = new byte[stream.Length];
-                stream.Position = 0;
-                stream.Read(bytes, 0, (int)stream.Length);
+                bf.Serialize(stream, obj);
+                return stream.ToArray();
             }
-            return bytes;
-
         }
 
-        public static T Deserialize<T>(byte[] data)
+        public static Object Deserialize(byte[] data)
         {
-            T deserializedObject = default(T);
-
-            using (var stream = new MemoryStream(data))
-            using (var reader = XmlDictionaryReader.CreateTextReader(stream, new XmlDictionaryReaderQuotas()))
+            
+            using (var memStream = new MemoryStream())
             {
-                var serializer = new DataContractSerializer(typeof(T));
-
-                deserializedObject = (T)serializer.ReadObject(reader, true);
+                var binForm = new BinaryFormatter();
+                memStream.Write(data, 0, data.Length);
+                memStream.Seek(0, SeekOrigin.Begin);
+                var obj = binForm.Deserialize(memStream);
+                return obj;
             }
-            return deserializedObject;
         }
     }
 }

@@ -31,7 +31,6 @@ namespace KashClient.Menus
                 Console.ReadKey();
                 Console.Clear();
             }
-            client.Stop();
         }
     }
 }

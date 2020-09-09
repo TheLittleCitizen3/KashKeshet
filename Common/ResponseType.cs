@@ -8,6 +8,8 @@ namespace Common
     public enum ResponseType
     {
         Text,
-        ClientsInfo
+        ClientsInfo,
+        ClientInfo,
+        ClientAllreadyExist
     }
 }

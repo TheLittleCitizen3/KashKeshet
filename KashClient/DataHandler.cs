@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Common;
+using KashClient.ResponsesHandler;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
@@ -14,8 +16,9 @@ namespace KashClient
             int byteCount;
             while ((byteCount = networkStream.Read(recivedBytes, 0, recivedBytes.Length)) > 0)
             {
-                string message = Encoding.ASCII.GetString(recivedBytes, 0, byteCount);
-                Console.WriteLine(message);
+                Response response = (Response)Serializator.Deserialize(recivedBytes);
+                ResponseManager responseManager = new ResponseManager();
+                responseManager.HandleResponse(response);
             }
         }
     }

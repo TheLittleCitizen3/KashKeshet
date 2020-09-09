@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Common;
+using KashClient.RequestHandler;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
@@ -16,6 +18,7 @@ namespace KashClient
         TcpClient client;
         NetworkStream NetworkStream;
         Thread thread;
+        ClientInfo ClientInfo;
         public Client(IPAddress ip, int port)
         {
             ServerIp = ip;
@@ -41,6 +44,7 @@ namespace KashClient
         {
             connect();
             NetworkStream = client.GetStream();
+            ClientInfo = LoginClient(client);
             thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
             thread.Start(client);
             GetUserInput();
@@ -50,7 +54,9 @@ namespace KashClient
             string s;
             while (!string.IsNullOrEmpty((s = Console.ReadLine())))
             {
-                byte[] buffer = Encoding.ASCII.GetBytes(s);
+                IRequestHandler requestHandler = new RequestHandle();
+                Request request = requestHandler.Create(ClientInfo, RequestType.SendGlobalMessage, s);
+                byte[] buffer = Serializator.Serialize(request);
                 NetworkStream.Write(buffer, 0, buffer.Length);
             }
         }
@@ -61,7 +67,28 @@ namespace KashClient
             NetworkStream.Close();
             client.Close();
             Console.WriteLine("Disconnected From Server");
-            
+
+        }
+        private ClientInfo LoginClient(TcpClient tcpClient)
+        {
+            Response response;
+            do
+            {
+                Console.WriteLine("Enter your user name or create new");
+                string userName = Console.ReadLine();
+                while (string.IsNullOrEmpty(userName))
+                {
+                    Console.WriteLine("Enter user name");
+                    userName = Console.ReadLine();
+                }
+                byte[] buffer = Encoding.ASCII.GetBytes(userName);
+                NetworkStream.Write(buffer, 0, buffer.Length);
+                NetworkStream stream = tcpClient.GetStream();
+                byte[] ResponseBuffer = new byte[1024];
+                int byte_count = stream.Read(ResponseBuffer, 0, ResponseBuffer.Length);
+                response = (Response)Serializator.Deserialize(ResponseBuffer);
+            } while (response.ResponseType == ResponseType.ClientAllreadyExist);
+            return null;
         }
     }
 }

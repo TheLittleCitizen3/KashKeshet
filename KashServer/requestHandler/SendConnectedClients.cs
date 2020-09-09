@@ -21,7 +21,7 @@ namespace KashServer.requestHandler
             connectedClients.Remove(selfClient.FirstOrDefault());
             IResponseAction responseAction = new ResponseHandler();
             Response response = responseAction.CreateResponse(ResponseType.ClientsInfo, connectedClients);
-            byte[] serializedResponse = Serializator.Serialize<Response>(response);
+            byte[] serializedResponse = Serializator.Serialize(response);
             SendMessage.Send(serializedResponse,selfClient.ToList());
         }
     }
