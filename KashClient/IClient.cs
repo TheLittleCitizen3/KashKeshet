@@ -7,6 +7,7 @@ namespace KashClient
     interface IClient
     {
         void Start();
+        void GetUserInput();
         void Stop();
     }
 }

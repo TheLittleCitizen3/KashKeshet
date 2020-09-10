@@ -19,6 +19,7 @@ namespace KashClient
         NetworkStream NetworkStream;
         Thread thread;
         ClientInfo ClientInfo;
+        private readonly object _lock = new object();
         public Client(IPAddress ip, int port)
         {
             ServerIp = ip;
@@ -45,19 +46,25 @@ namespace KashClient
             connect();
             NetworkStream = client.GetStream();
             ClientInfo = LoginClient(client);
+            Console.WriteLine($"You are now logged in as: {ClientInfo.DisplayName}");
             thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
             thread.Start(client);
-            GetUserInput();
         }
-        private void GetUserInput()
+        public void GetUserInput()
         {
-            string s;
-            while (!string.IsNullOrEmpty((s = Console.ReadLine())))
+            Console.WriteLine("Enter Message to Global Chat or enter 'EXIT'");
+            Console.Write(">");
+            string message = Console.ReadLine();
+
+            while (message != "EXIT")
             {
                 IRequestHandler requestHandler = new RequestHandle();
-                Request request = requestHandler.Create(ClientInfo, RequestType.SendGlobalMessage, s);
+                Request request = requestHandler.Create(ClientInfo, RequestType.SendGlobalMessage, message);
                 byte[] buffer = Serializator.Serialize(request);
-                NetworkStream.Write(buffer, 0, buffer.Length);
+                NetworkStream.Write(buffer, 0, buffer.Length);;
+                message = Console.ReadLine();
+
+
             }
         }
         public void Stop()
@@ -87,6 +94,10 @@ namespace KashClient
                 byte[] ResponseBuffer = new byte[1024];
                 int byte_count = stream.Read(ResponseBuffer, 0, ResponseBuffer.Length);
                 response = (Response)Serializator.Deserialize(ResponseBuffer);
+                if (response.ResponseType == ResponseType.ClientAllreadyExist)
+                {
+                    Console.WriteLine("User allready exist!");
+                }
             } while (response.ResponseType == ResponseType.ClientAllreadyExist);
             return (ClientInfo)response.Content;
         }

@@ -24,6 +24,7 @@ namespace KashClient.Menus
         }
         public void Start()
         {
+            client.Start();
             while (true)
             {
                 Menu.Start();

@@ -17,14 +17,8 @@ namespace KashClient.Menus
             
         }
         public void Act()
-        {
-            Client.Start();
-            string action = "";
-            while (action.ToLower() != "exit")
-            {
-                Console.WriteLine("this is global chat type 'exit' to return main menu ");
-                action = Console.ReadLine();
-            }
+        { //cahnge here to init client before!
+            Client.GetUserInput();
         }
     }
 }
