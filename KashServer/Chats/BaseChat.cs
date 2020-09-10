@@ -9,13 +9,19 @@ namespace KashServer.Chats
 {
     public abstract class BaseChat
     {
+
         public ConcurrentDictionary<ClientInfo,Client> ChatMembers { get; set; }
         public ConcurrentDictionary<ClientInfo,Client> ActiveClientsInChat { get; set; }
+        public ChatInfo ChatInfo { get; set; }
 
         public BaseChat()
         {
             ChatMembers = new ConcurrentDictionary<ClientInfo, Client>();
             ActiveClientsInChat = new ConcurrentDictionary<ClientInfo, Client>();
+            ChatInfo = new ChatInfo
+            {
+                Id = Guid.NewGuid().ToString()
+            };
         }
         public virtual void  AddMemberToChat(Client client)
         {

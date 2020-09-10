@@ -1,4 +1,5 @@
 ﻿using Common;
+using KashServer.Chats;
 using KashServer.Clients;
 using System;
 using System.Collections.Concurrent;
@@ -9,6 +10,6 @@ namespace KashServer
 {
     public interface IRequestAction
     {
-        void Invoke(Request request,ConcurrentDictionary<ClientInfo,Client> clients);
+        void Invoke(Request request,ConcurrentDictionary<ClientInfo,Client> clients, List<BaseChat> chats);
     }
 }

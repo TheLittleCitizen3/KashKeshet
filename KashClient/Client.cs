@@ -16,10 +16,12 @@ namespace KashClient
         private IPAddress ServerIp;
         private int ServerPort;
         private IDataHandler dataHandler;
-        TcpClient client;
-        NetworkStream NetworkStream;
-        Thread thread;
-        ClientInfo ClientInfo;
+        public TcpClient client { get; set; }
+        public NetworkStream NetworkStream { get; set; }
+        private Thread _thread;
+        public ClientInfo ClientInfo { get; set; }
+        
+
         private readonly object _lock = new object();
         public Client(IPAddress ip, int port)
         {
@@ -29,7 +31,7 @@ namespace KashClient
             client = new TcpClient();
         }
 
-        private void connect()
+        private void Connect()
         {
             try
             {
@@ -44,12 +46,12 @@ namespace KashClient
         }
         public void Start()
         {
-            connect();
+            Connect();
             NetworkStream = client.GetStream();
             ClientInfo = LoginClient(client);
             Console.WriteLine($"You are now logged in as: {ClientInfo.DisplayName}");
-            thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
-            thread.Start(client);
+            _thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
+            _thread.Start(client);
         }
         public string GetUserInput()
         {            
@@ -67,7 +69,7 @@ namespace KashClient
         public void Stop()
         {
             client.Client.Shutdown(SocketShutdown.Send);
-            thread.Join();
+            _thread.Join();
             NetworkStream.Close();
             client.Close();
             Console.WriteLine("Disconnected From Server");

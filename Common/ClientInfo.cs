@@ -11,6 +11,6 @@ namespace Common
         public ClientInfo(string displayName)
         {
             DisplayName = displayName;
-        }
+        }  
     }
 }

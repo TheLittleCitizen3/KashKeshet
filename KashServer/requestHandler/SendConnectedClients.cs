@@ -1,4 +1,5 @@
 ﻿using Common;
+using KashServer.Chats;
 using KashServer.Clients;
 using KashServer.responseHandler;
 using KashServer.SendRecive;
@@ -12,7 +13,7 @@ namespace KashServer.requestHandler
 {
     class SendConnectedClients : IRequestAction
     {
-        public void Invoke(Request request, ConcurrentDictionary<ClientInfo, Client> clients)
+        public void Invoke(Request request, ConcurrentDictionary<ClientInfo, Client> clients, List<BaseChat> chats)
         {
             var connectedClients = clients
                 .Select(c => c.Value)

@@ -5,12 +5,11 @@ using Common;
 
 namespace KashServer.Chats
 {
-    public class PrivateChat : BaseChat
+    public class GlobalChat : BaseChat
     {
-        public PrivateChat():base()
+        public GlobalChat() : base()
         {
-            ChatInfo.Type = ChatType.PrivateChat;
+            ChatInfo.Type = ChatType.GlobalChat;
         }
-
     }
 }

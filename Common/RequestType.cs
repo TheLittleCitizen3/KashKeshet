@@ -10,6 +10,7 @@ namespace Common
         Register,
         GetConnectedUsers,
         StartPrivteChat,
-        SendGlobalMessage
+        SendGlobalMessage,
+        ChangeCurrentChat
     }
 }

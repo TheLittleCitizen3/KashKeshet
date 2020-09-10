@@ -6,6 +6,9 @@ namespace KashClient.RequestCreator
 {
     class RequestHandler
     {
-
+        public void Handle()
+        {
+            
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Common;
+using KashServer.Chats;
 using KashServer.Clients;
 using System;
 using System.Collections.Concurrent;
@@ -9,12 +10,13 @@ namespace KashServer.requestHandler
 {
     class RequsetManager
     {
-        public void HandleRequest(Request request, ConcurrentDictionary<ClientInfo, Client> clients)
+        public void HandleRequest(Request request, ConcurrentDictionary<ClientInfo, Client> clients, List<BaseChat> chats)
         {
             RequestContext requestContext = new RequestContext();
             switch (request.Type)
             {
-                case RequestType.Register:
+                case RequestType.ChangeCurrentChat:
+                    requestContext.SetRequestAction(new ChangeCurrentChat());
                     break;
                 case RequestType.GetConnectedUsers:
                     requestContext.SetRequestAction(new SendConnectedClients());
@@ -27,7 +29,7 @@ namespace KashServer.requestHandler
                 default:
                     break;
             }
-            requestContext.Invoke(request, clients);
+            requestContext.Invoke(request, clients,chats);
         }
     }
 }

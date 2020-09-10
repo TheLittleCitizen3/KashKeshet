@@ -1,4 +1,5 @@
 ﻿using Common;
+using KashServer.Chats;
 using KashServer.Clients;
 using KashServer.requestHandler;
 using KashServer.responseHandler;
@@ -20,21 +21,30 @@ namespace KashServer
     public class Server : IServer
     {
         private readonly ILogger<Worker> _logger;
-        private ConcurrentDictionary<ClientInfo, Client> Clients { get; set; }
+        private ConcurrentDictionary<ClientInfo, Client> _Clients { get; set; }
+        private List<BaseChat> _Chats { get; set; }
+        private RequsetManager _requestManager { get; set; }
         readonly object _lock = new object();
         IPAddress Ip;
         int Port;
         public Server(IPAddress ip, int port, ILogger<Worker> logger)
         {
-            Clients = new ConcurrentDictionary<ClientInfo, Client>();
+            _Clients = new ConcurrentDictionary<ClientInfo, Client>();
             Ip = ip;
             Port = port;
             _logger = logger;
+            _Chats = new List<BaseChat>();
+            _requestManager = new RequsetManager();
         }
         public void StartServer()
         {
             TcpListener ServerSocket = new TcpListener(Ip, Port);
             ServerSocket.Start();
+            GlobalChat globalChat = new GlobalChat();
+            lock (_lock)
+            {
+                _Chats.Add(globalChat);
+            }
             while (true)
             {
                 TcpClient tcpClient = ServerSocket.AcceptTcpClient();
@@ -74,21 +84,20 @@ namespace KashServer
                     }
 
                     Request request = (Request)Serializator.Deserialize(buffer);
-                    RequsetManager requestManager = new RequsetManager();
-                    requestManager.HandleRequest(request, Clients);
+                    _requestManager.HandleRequest(request, _Clients, _Chats);
                     _logger.LogInformation($"Client id:{client.ClientInfo.DisplayName} Write:{request.Content.ToString()}");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError("user disconnected with massage:" + ex.Message);
-                    Clients[client.ClientInfo].ClientStatus = ClientStatus.Disconnected;
+                    _Clients[client.ClientInfo].ClientStatus = ClientStatus.Disconnected;
                     break;
                 }
 
             }
             if (client!=null)
             {
-                Clients[client.ClientInfo].ClientStatus = ClientStatus.Disconnected;
+                _Clients[client.ClientInfo].ClientStatus = ClientStatus.Disconnected;
             }
             tcpClient.Client.Shutdown(SocketShutdown.Both);
             tcpClient.Close();
@@ -108,7 +117,7 @@ namespace KashServer
                     if (IsUserExist(userName))
                     {
                         ClientInfo clientInfo = GetClientInfoByName(userName);
-                        if (Clients[GetClientInfoByName(userName)].ClientStatus == ClientStatus.Disconnected)
+                        if (_Clients[GetClientInfoByName(userName)].ClientStatus == ClientStatus.Disconnected)
                         {
                             ChangeExistingClientToConnected(clientInfo);
                             updateClientsTcpClient(clientInfo, tcpClient); 
@@ -134,35 +143,35 @@ namespace KashServer
         }
         private bool IsUserExist(string userName)
         {
-            var client = Clients.Select(c => c.Key)
+            var client = _Clients.Select(c => c.Key)
                 .Where(c => c.DisplayName == userName).ToList();
 
             return client.Count() > 0;
         }
         private ClientInfo GetClientInfoByName(string userName)
         {
-            var client = Clients.Select(c => c.Key)
+            var client = _Clients.Select(c => c.Key)
                 .Where(c => c.DisplayName == userName).ToList();
             return client.FirstOrDefault();
         }
         private void ChangeExistingClientToConnected(ClientInfo clientInfo)
         {
-            Clients[clientInfo].ClientStatus = ClientStatus.Connected;
-            Clients[clientInfo].ClientInfo = clientInfo;
+            _Clients[clientInfo].ClientStatus = ClientStatus.Connected;
+            _Clients[clientInfo].ClientInfo = clientInfo;
             return;
         }
         private void updateClientsTcpClient(ClientInfo clientInfo, TcpClient tcpClient)
         {
-            Clients[clientInfo].TcpClient = tcpClient;
+            _Clients[clientInfo].TcpClient = tcpClient;
         }
         private void AddNewClient(TcpClient tcpClient, string userName)
         {
             Client client = new Client(tcpClient, userName);
-            Clients.TryAdd(client.ClientInfo, client);
+            _Clients.TryAdd(client.ClientInfo, client);
         }
         private Client GetClientByTcpclient(TcpClient tcpClient)
         {
-            var client = Clients.FirstOrDefault(c => c.Value.TcpClient == tcpClient).Value;
+            var client = _Clients.FirstOrDefault(c => c.Value.TcpClient == tcpClient).Value;
             return client;
         }
         private void SendLoginResponse(TcpClient tcpClient, ResponseType responseType)

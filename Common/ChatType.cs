@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Common
 {
+    [Serializable]
     public enum ChatType
     {
+        None,
         GlobalChat,
         PrivateChat,
         GroupChat
