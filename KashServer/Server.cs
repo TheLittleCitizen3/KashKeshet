@@ -39,7 +39,6 @@ namespace KashServer
             {
                 TcpClient tcpClient = ServerSocket.AcceptTcpClient();
                 _logger.LogInformation("New Client Was Added!");
-                //SendMessage.Send($"The user: {clientInfo.DisplayName} joinned", Clients.Values.ToList());
                 Thread t = new Thread(HandleClient);
                 t.Start(tcpClient);
 
@@ -75,11 +74,8 @@ namespace KashServer
                     }
 
                     Request request = (Request)Serializator.Deserialize(buffer);
-                    //string data = Encoding.ASCII.GetString(buffer, 0, byte_count);
-                    //data = MessageFormatter.FormatMessage(data, client);
                     RequsetManager requestManager = new RequsetManager();
                     requestManager.HandleRequest(request, Clients);
-                    //SendMessage.Send(data, Clients.Values.ToList());
                     _logger.LogInformation($"Client id:{client.ClientInfo.DisplayName} Write:{request.Content.ToString()}");
                 }
                 catch (Exception ex)
@@ -172,7 +168,6 @@ namespace KashServer
         private void SendLoginResponse(TcpClient tcpClient, ResponseType responseType)
         {
             Client client;
-            List<Client> responseClients = new List<Client>();
             IResponseAction responseAction = new ResponseHandler();
             Response response;
             if (responseType == ResponseType.ClientInfo)

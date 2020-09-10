@@ -1,4 +1,5 @@
-﻿using MenuBuilder;
+﻿using Common;
+using MenuBuilder;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,8 +18,14 @@ namespace KashClient.Menus
             
         }
         public void Act()
-        { //cahnge here to init client before!
-            Client.GetUserInput();
+        {
+            Console.WriteLine("Enter Message to Global Chat or enter 'EXIT'");
+            string message = Client.GetUserInput();
+            while (message != "EXIT")
+            {
+                Client.SendRequest(RequestType.SendGlobalMessage, message);
+                message = Client.GetUserInput();
+            }
         }
     }
 }

@@ -15,9 +15,13 @@ namespace KashServer.SendRecive
             {
                 foreach (Client c in clients)
                 {
-                    NetworkStream stream = c.TcpClient.GetStream();
 
-                    stream.Write(serizlizedData, 0, serizlizedData.Length);
+                    if (c.ClientStatus == ClientStatus.Connected)
+                    {
+                        NetworkStream stream = c.TcpClient.GetStream();
+
+                        stream.Write(serizlizedData, 0, serizlizedData.Length); 
+                    }
                 }
             }
         }

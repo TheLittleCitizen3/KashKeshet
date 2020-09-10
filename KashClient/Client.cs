@@ -1,9 +1,10 @@
 ﻿using Common;
-using KashClient.RequestHandler;
+using KashClient.RequestCreator;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -50,22 +51,18 @@ namespace KashClient
             thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
             thread.Start(client);
         }
-        public void GetUserInput()
-        {
-            Console.WriteLine("Enter Message to Global Chat or enter 'EXIT'");
+        public string GetUserInput()
+        {            
             Console.Write(">");
             string message = Console.ReadLine();
-
-            while (message != "EXIT")
-            {
-                IRequestHandler requestHandler = new RequestHandle();
-                Request request = requestHandler.Create(ClientInfo, RequestType.SendGlobalMessage, message);
-                byte[] buffer = Serializator.Serialize(request);
-                NetworkStream.Write(buffer, 0, buffer.Length);;
-                message = Console.ReadLine();
-
-
-            }
+            return message;
+        }
+        public void SendRequest(RequestType requestType, object obj)
+        {
+            IRequestCreation requestCreator = new RequestCreator.RequestCreator();
+            Common.Request request = requestCreator.Create(ClientInfo, requestType, obj);
+            byte[] buffer = Serializator.Serialize(request);
+            NetworkStream.Write(buffer, 0, buffer.Length); ;
         }
         public void Stop()
         {
@@ -82,11 +79,11 @@ namespace KashClient
             do
             {
                 Console.WriteLine("Enter your user name or create new");
-                string userName = Console.ReadLine();
+                string userName = Console.ReadLine().ToLower();
                 while (string.IsNullOrEmpty(userName))
                 {
                     Console.WriteLine("Enter user name");
-                    userName = Console.ReadLine();
+                    userName = Console.ReadLine().ToLower();
                 }
                 byte[] buffer = Encoding.ASCII.GetBytes(userName);
                 NetworkStream.Write(buffer, 0, buffer.Length);
