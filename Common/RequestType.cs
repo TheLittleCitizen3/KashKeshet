@@ -11,6 +11,7 @@ namespace Common
         GetConnectedUsers,
         StartPrivteChat,
         SendGlobalMessage,
-        ChangeCurrentChat
+        ChangeCurrentChat,
+        GetPrivateChats
     }
 }

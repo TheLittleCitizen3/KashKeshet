@@ -19,7 +19,7 @@ namespace KashClient.Menus
             client = new Client(IPAddress.Parse("127.0.0.1"), 9000);
             ITakeAction globalChat = new GlobalChat(client);
             ActionItems.Add("1", globalChat);
-            List<IInputvalidation> inputvalidations = new List<IInputvalidation>() { new IntInputValidation(), new MainMenuValidation() };
+            List<IInputvalidation> inputvalidations = new List<IInputvalidation>() { new IntInputValidation(), new IntOptionValidation(1,2) };
             Menu = new StringMenu(ActionItems, inputvalidations);
         }
         public void Start()
