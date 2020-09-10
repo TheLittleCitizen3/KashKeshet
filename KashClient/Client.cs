@@ -88,7 +88,7 @@ namespace KashClient
                 int byte_count = stream.Read(ResponseBuffer, 0, ResponseBuffer.Length);
                 response = (Response)Serializator.Deserialize(ResponseBuffer);
             } while (response.ResponseType == ResponseType.ClientAllreadyExist);
-            return null;
+            return (ClientInfo)response.Content;
         }
     }
 }
