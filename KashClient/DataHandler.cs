@@ -9,17 +9,17 @@ namespace KashClient
 {
     public class DataHandler : IDataHandler
     {
-        public void Recivedata(TcpClient client)
+        public void Recivedata(IClient client)
         {
             try
             {
-                NetworkStream networkStream = client.GetStream();
+                NetworkStream networkStream = client.TcpClient.GetStream();
                 byte[] recivedBytes = new byte[1024];
                 int byteCount;
                 while ((byteCount = networkStream.Read(recivedBytes, 0, recivedBytes.Length)) > 0)
                 {
                     Response response = (Response)Serializator.Deserialize(recivedBytes);
-                    ResponseManager responseManager = new ResponseManager();
+                    ResponseManager responseManager = new ResponseManager(client);
                     responseManager.HandleResponse(response);
                 }
             }

@@ -10,6 +10,7 @@ namespace Common
         Text,
         ClientsInfo,
         ClientInfo,
-        ClientAllreadyExist
+        ClientAllreadyExist,
+        StartPrivateChat
     }
 }

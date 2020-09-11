@@ -8,6 +8,6 @@ namespace KashClient
 {
     public interface IDataHandler
     {
-        void Recivedata(TcpClient client);
+        void Recivedata(IClient client);
     }
 }

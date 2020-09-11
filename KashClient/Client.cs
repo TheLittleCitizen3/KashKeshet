@@ -11,12 +11,12 @@ using System.Threading;
 
 namespace KashClient
 {
-    class Client : IClient
+    public class Client : IClient
     {
         private IPAddress ServerIp;
         private int ServerPort;
         private IDataHandler dataHandler;
-        public TcpClient client { get; set; }
+        public TcpClient TcpClient { get; set; }
         public NetworkStream NetworkStream { get; set; }
         private Thread _thread;
         public ClientInfo ClientInfo { get; set; }
@@ -28,14 +28,14 @@ namespace KashClient
             ServerIp = ip;
             ServerPort = port;
             dataHandler = new DataHandler();
-            client = new TcpClient();
+            TcpClient = new TcpClient();
         }
 
         private void Connect()
         {
             try
             {
-                client.Connect(ServerIp, ServerPort);
+                TcpClient.Connect(ServerIp, ServerPort);
                 Console.WriteLine("Client Connected to Server");
             }
             catch (Exception ex)
@@ -47,11 +47,11 @@ namespace KashClient
         public void Start()
         {
             Connect();
-            NetworkStream = client.GetStream();
-            ClientInfo = LoginClient(client);
+            NetworkStream = TcpClient.GetStream();
+            ClientInfo = LoginClient(TcpClient);
             Console.WriteLine($"You are now logged in as: {ClientInfo.DisplayName}");
-            _thread = new Thread(o => dataHandler.Recivedata((TcpClient)o));
-            _thread.Start(client);
+            _thread = new Thread(o => dataHandler.Recivedata((Client)o));
+            _thread.Start(this);
         }
         public string GetUserInput()
         {            
@@ -68,10 +68,10 @@ namespace KashClient
         }
         public void Stop()
         {
-            client.Client.Shutdown(SocketShutdown.Send);
+            TcpClient.Client.Shutdown(SocketShutdown.Send);
             _thread.Join();
             NetworkStream.Close();
-            client.Close();
+            TcpClient.Close();
             Console.WriteLine("Disconnected From Server");
 
         }

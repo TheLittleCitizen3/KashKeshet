@@ -12,6 +12,7 @@ namespace Common
         StartPrivteChat,
         SendGlobalMessage,
         ChangeCurrentChat,
-        GetPrivateChats
+        GetPrivateChats,
+        SendPrivateOrGroupMessage
     }
 }

@@ -18,13 +18,14 @@ namespace KashServer.requestHandler
             var connectedClients = clients
                 .Select(c => c.Value)
                 .Where(c => c.ClientStatus == ClientStatus.Connected).ToList();
-            var selfClient = connectedClients.Where(c => c.ClientInfo == request.ClientsInfo);
-            connectedClients.Remove(selfClient.FirstOrDefault());
+            var selfClient = connectedClients.FirstOrDefault(c => c.ClientInfo.DisplayName == request.ClientsInfo.DisplayName);
+            connectedClients.Remove(selfClient);
             var connectedClientsInfo = connectedClients.Select(c => c.ClientInfo).ToList();
+            List<Client> selfClientInList = new List<Client>() { selfClient };
             IResponseAction responseAction = new ResponseHandler();
             Response response = responseAction.CreateResponse(ResponseType.ClientsInfo, connectedClientsInfo);
             byte[] serializedResponse = Serializator.Serialize(response);
-            SendMessage.Send(serializedResponse,selfClient.ToList());
+            SendMessage.Send(serializedResponse, selfClientInList);
         }
     }
 }
